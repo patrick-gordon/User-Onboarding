@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 import { Form, Field, withFormik } from 'formik';
 import * as Yup from 'yup';
 import Axios from 'axios';
@@ -16,7 +16,17 @@ const OnboardFormStyle = styled.div`
 
 
 
-const OnboardForm = ({ errors, touched, values }) => {
+const OnboardForm = ({ errors, touched, values, status }) => {
+
+    const [users, setUsers] = useState([]);
+
+    useEffect(() => {
+        if(status) {
+            setUsers([...users, status]);
+        }
+    }, [status]);
+
+
     return (
         <OnboardFormStyle>
             <h1>Sign Up</h1>
@@ -65,11 +75,14 @@ const FormikOnboardForm = withFormik({
         termsOfService: Yup.bool().oneOf([true], 'Hey man you have to check this box to move on')
     }),
 
-    handleSubmit(values) {
+    handleSubmit(values, {setStatus, resetForm}) {
         Axios
         .post('https://reqres.in/api/users', values)
-        .then(res => console.log(res))
-        .catch(err => console.log(err))
+        .then(res => {
+            setStatus(res.data);
+            resetForm();
+        })
+        .catch(err => console.log(err.response))
     }
 })(OnboardForm)
 
